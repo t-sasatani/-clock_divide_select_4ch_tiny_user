@@ -1,11 +1,11 @@
 magic
 tech sky130A
 magscale 1 2
-timestamp 1672339082
+timestamp 1672340475
 << obsli1 >>
 rect 1104 2159 22816 27761
 << obsm1 >>
-rect 1104 2128 22976 27792
+rect 1104 2128 22976 27872
 << metal2 >>
 rect 1214 29200 1270 30000
 rect 2042 29200 2098 30000
@@ -62,7 +62,7 @@ rect 20370 29144 21030 29322
 rect 21198 29144 21858 29322
 rect 22026 29144 22686 29322
 rect 22854 29144 22970 29322
-rect 1270 983 22970 29144
+rect 1214 983 22970 29144
 << metal3 >>
 rect 0 28840 800 28960
 rect 0 28160 800 28280
@@ -152,7 +152,9 @@ rect 0 2320 800 2440
 rect 0 1640 800 1760
 rect 0 960 800 1080
 << obsm3 >>
-rect 880 28080 23200 28253
+rect 880 28760 23200 28933
+rect 800 28360 23200 28760
+rect 880 28080 23200 28360
 rect 800 27680 23200 28080
 rect 880 27400 23200 27680
 rect 800 27000 23200 27400
@@ -314,6 +316,14 @@ rect 14514 2128 14834 27792
 rect 17228 2128 17548 27792
 rect 19942 2128 20262 27792
 rect 22656 2128 22976 27792
+<< obsm4 >>
+rect 4107 14451 6292 26485
+rect 6772 14451 9006 26485
+rect 9486 14451 11720 26485
+rect 12200 14451 14434 26485
+rect 14914 14451 17148 26485
+rect 17628 14451 19862 26485
+rect 20342 14451 21469 26485
 << labels >>
 rlabel metal3 s 23200 2864 24000 2984 6 io_in[0]
 port 1 nsew signal input
@@ -563,8 +573,8 @@ port 116 nsew ground bidirectional
 string FIXED_BBOX 0 0 24000 30000
 string LEFclass BLOCK
 string LEFview TRUE
-string GDS_END 423974
-string GDS_FILE /home/runner/work/clock_divide_select_4ch_tiny_user/clock_divide_select_4ch_tiny_user/openlane/tiny_user_project/runs/22_12_29_18_36/results/signoff/tiny_user_project.magic.gds
-string GDS_START 23768
+string GDS_END 1085150
+string GDS_FILE /home/runner/work/clock_divide_select_4ch_tiny_user/clock_divide_select_4ch_tiny_user/openlane/tiny_user_project/runs/22_12_29_18_59/results/signoff/tiny_user_project.magic.gds
+string GDS_START 153314
 << end >>
 
