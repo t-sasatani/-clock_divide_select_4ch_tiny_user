@@ -1,7 +1,7 @@
 
 module user_module(
         input   wire    clk,
-        input   wire    [34:0] io_in,
+        input   wire    [33:0] io_in,
         output  wire    out
     );
     
@@ -16,12 +16,10 @@ module user_module(
     wire [7:0]  clock_div_factor_c;
     wire [7:0]  clock_div_factor_d;
     wire [1:0]  clock_select;
-    wire        enable;
     wire        clock_syn;
     
     assign  clock_select = io_in[1:0];
-    assign  enable = io_in[34];
-    assign  clock_syn = (enable)? div_clock[clock_select]:0;
+    assign  clock_syn = div_clock[clock_select];
     assign  clock_div_factor_a = io_in[9:2];
     assign  clock_div_factor_b = io_in[17:10];
     assign  clock_div_factor_c = io_in[25:18];

@@ -30,8 +30,6 @@ documentation:
     - clock_selector_bit0
     - clock_selector_bit1
     - clock_A_division_factor_bit0
-    - clock_A_division_factor_bit0
-    - clock_A_division_factor_bit0
     - clock_A_division_factor_bit1
     - clock_A_division_factor_bit2
     - clock_A_division_factor_bit3
@@ -63,7 +61,6 @@ documentation:
     - clock_D_division_factor_bit5
     - clock_D_division_factor_bit6
     - clock_D_division_factor_bit7
-    - enable
   outputs:
     - clock_selected
 
