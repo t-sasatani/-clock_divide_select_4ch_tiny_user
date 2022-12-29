@@ -1,7 +1,6 @@
 
 module user_module(
-        input   wire    clk,
-        input   wire    [25:0] io_in,
+        input   wire    [26:0] io_in,
         output  wire    out
     );
     
@@ -16,14 +15,16 @@ module user_module(
     wire [5:0]  clock_div_factor_c;
     wire [5:0]  clock_div_factor_d;
     wire [1:0]  clock_select;
+    wire        clk;
     wire        clock_syn;
     
-    assign  clock_select = io_in[1:0];
+    assign  clk = io_in[0]
+    assign  clock_select = io_in[2:1];
     assign  clock_syn = div_clock[clock_select];
-    assign  clock_div_factor_a = io_in[7:2];
-    assign  clock_div_factor_b = io_in[13:8];
-    assign  clock_div_factor_c = io_in[19:14];
-    assign  clock_div_factor_d = io_in[25:20];
+    assign  clock_div_factor_a = io_in[8:3];
+    assign  clock_div_factor_b = io_in[14:9];
+    assign  clock_div_factor_c = io_in[20:15];
+    assign  clock_div_factor_d = io_in[26:21];
     
     
     always @ (posedge clk) begin
