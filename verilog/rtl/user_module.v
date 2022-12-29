@@ -18,7 +18,7 @@ module user_module(
     wire        clk;
     wire        clock_syn;
     
-    assign  clk = io_in[0]
+    assign  clk = io_in[0];
     assign  clock_select = io_in[2:1];
     assign  clock_syn = div_clock[clock_select];
     assign  clock_div_factor_a = io_in[8:3];
