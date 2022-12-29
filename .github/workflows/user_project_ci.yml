@@ -1,0 +1,409 @@
+name: user_project_ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+env:
+  PDK_ROOT: '/home/runner/work/pdk'
+  OPENLANE_ROOT: '/home/runner/work/openlane'
+  PDK: 'sky130A'
+  SETUP_CACHE_KEY: 'mpw-8c'
+
+concurrency: ${{ github.workflow }}-${{ github.ref_name }}
+
+jobs:
+  gds:
+    runs-on: ubuntu-latest
+    steps:
+    - name: maximize build space
+      uses: easimon/maximize-build-space@master
+      with:
+        root-reserve-mb: 8096
+        swap-size-mb: 8096
+        remove-dotnet: 'true'
+
+    - uses: actions/checkout@v3
+
+    - name: cache setup
+      id: cache-setup
+      uses: actions/cache@v3
+      with:
+        path: |
+          ${{ env.PDK_ROOT }}
+          ${{ env.OPENLANE_ROOT }}
+          caravel/
+          mgmt_core_wrapper/
+          openlane.tar
+        key: ${{ runner.os }}-setup-${{ env.SETUP_CACHE_KEY }}
+
+    - if: steps.cache-setup.outputs.cache-hit != 'true'
+      name: setup
+      run: |
+        make setup
+        docker save efabless/openlane > openlane.tar
+
+    - if: steps.cache-setup.outputs.cache-hit == 'true'
+      name: restore setup
+      run: |
+        docker load < openlane.tar
+
+    - name: debug
+      run: |
+        find $OPENLANE_ROOT/
+        find $PDK_ROOT/
+
+    - name: setup python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: fetch verilog and build config
+      run: |
+        python -m pip install requests PyYAML Jinja2
+        python configure.py --create-user-config
+
+    - name: harden tiny_user_project
+      run: |
+        make tiny_user_project
+        find openlane/tiny_user_project/runs/tiny_user_project/
+
+    - name: show tiny_user_project metrics
+      run: |
+        python << EOF >> $GITHUB_STEP_SUMMARY
+        import csv
+        import pathlib
+
+        print('# tiny_user_project')
+        print('## metrics')
+        metrics = pathlib.Path('openlane/tiny_user_project/runs/tiny_user_project/reports/metrics.csv')
+        with metrics.open() as f:
+            d = list(csv.DictReader(f))[0]
+            print('key|value')
+            print('---|-----')
+            for k,v in d.items():
+              print(f'{k}|{v}')
+        EOF
+
+    - name: show tiny_user_project reports
+      run: |
+        cat << EOF >> $GITHUB_STEP_SUMMARY
+        ## manufacturability
+
+        \`\`\`
+        `cat openlane/tiny_user_project/runs/tiny_user_project/reports/manufacturability.rpt`
+        \`\`\`
+        EOF
+
+    - name: harden user_project_wrapper
+      run: |
+        make user_project_wrapper
+        find openlane/user_project_wrapper/runs/user_project_wrapper/
+
+    - name: show user_project_wrapper metrics
+      run: |
+        python << EOF >> $GITHUB_STEP_SUMMARY
+        import csv
+        import pathlib
+
+        print('# user_project_wrapper')
+        print('## metrics')
+        metrics = pathlib.Path('openlane/user_project_wrapper/runs/user_project_wrapper/reports/metrics.csv')
+        with metrics.open() as f:
+            d = list(csv.DictReader(f))[0]
+            print('key|value')
+            print('---|-----')
+            for k,v in d.items():
+              print(f'{k}|{v}')
+        EOF
+
+    - name: show user_project_wrapper reports
+      run: |
+        cat << EOF >> $GITHUB_STEP_SUMMARY
+        ## manufacturability
+
+        \`\`\`
+        `cat openlane/user_project_wrapper/runs/user_project_wrapper/reports/manufacturability.rpt`
+        \`\`\`
+        EOF
+
+    - name: cache gds
+      uses: actions/cache@v3
+      with:
+        path: |
+          def/
+          gds/
+          lef/
+          mag/
+          maglef/
+          sdc/
+          sdf/
+          signoff/
+          spef/
+          spi/
+          verilog/
+          openlane/tiny_user_project/runs/tiny_user_project/tmp/synthesis/post_techmap.dot
+        key: ${{ runner.os }}-gds-${{ github.run_id }}
+
+  precheck:
+    needs:
+    - gds
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: restore setup
+      uses: actions/cache@v3
+      with:
+        path: |
+          ${{ env.PDK_ROOT }}
+          ${{ env.OPENLANE_ROOT }}
+          caravel/
+          mgmt_core_wrapper/
+          openlane.tar
+        key: ${{ runner.os }}-setup-${{ env.SETUP_TAG }}
+
+    - name: setup
+      run: |
+        make precheck
+
+    - name: restore gds cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          def/
+          gds/
+          lef/
+          mag/
+          maglef/
+          sdc/
+          sdf/
+          signoff/
+          spef/
+          spi/
+          verilog/
+          openlane/tiny_user_project/runs/tiny_user_project/tmp/synthesis/post_techmap.dot
+        key: ${{ runner.os }}-gds-${{ github.run_id }}
+
+    - name: check
+      run: |
+        make run-precheck
+
+    - name: summary
+      run: |
+        cat << EOF >> $GITHUB_STEP_SUMMARY
+        \`\`\`
+        `cat precheck_results/*/logs/precheck.log`
+        \`\`\`
+        EOF
+
+  commit:
+    if: github.ref_name == 'main'
+    needs:
+    - precheck
+    - gds
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: restore gds cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          def/
+          gds/
+          lef/
+          mag/
+          maglef/
+          sdc/
+          sdf/
+          signoff/
+          spef/
+          spi/
+          verilog/
+          openlane/tiny_user_project/runs/tiny_user_project/tmp/synthesis/post_techmap.dot
+        key: ${{ runner.os }}-gds-${{ github.run_id }}
+
+    - name: commit
+      run: |
+        git status
+        git config --local user.name "tinybot"
+        git config --local user.email "bot@tinytapeout.com"
+        git add .
+        git commit -m "harden project [skip ci]"
+        git push origin main
+
+  img:
+    needs: gds
+    runs-on: ubuntu-latest
+    steps:
+    - name: setup python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: restore gds cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          def/
+          gds/
+          lef/
+          mag/
+          maglef/
+          sdc/
+          sdf/
+          signoff/
+          spef/
+          spi/
+          verilog/
+          openlane/tiny_user_project/runs/tiny_user_project/tmp/synthesis/post_techmap.dot
+        key: ${{ runner.os }}-gds-${{ github.run_id }}
+    - name: create synth svg
+      run: |
+        sudo apt-get install -yq graphviz
+        dot -Tpng openlane/tiny_user_project/runs/tiny_user_project/tmp/synthesis/post_techmap.dot > tiny_user_project_synth.png
+    - name: create layout svg
+      run: |
+        python -m pip install gdstk
+        python << EOF
+        import gdstk
+        library = gdstk.read_gds('gds/tiny_user_project.gds')
+        top_cells = library.top_level()
+        top_cells[0].write_svg('tiny_user_project_layout.svg')
+        EOF
+    - name: convert to png
+      run: |
+        python -m pip install cairosvg
+        python << EOF
+        import cairosvg
+        cairosvg.svg2png(url='tiny_user_project_layout.svg', write_to='tiny_user_project_layout.png', output_width=500)        
+        EOF
+    - name: populate img cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          tiny_user_project_synth.png
+          tiny_user_project_layout.png
+        key: ${{ runner.os }}-img-${{ github.run_id }}
+
+  view:
+    needs: gds
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout GDS2glTF repo
+      uses: actions/checkout@v3
+      with:
+        repository: mbalestrini/GDS2glTF
+
+    - name: setup python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: restore gds cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          def/
+          gds/
+          lef/
+          mag/
+          maglef/
+          sdc/
+          sdf/
+          signoff/
+          spef/
+          spi/
+          verilog/
+          openlane/tiny_user_project/runs/tiny_user_project/tmp/synthesis/post_techmap.dot
+        key: ${{ runner.os }}-gds-${{ github.run_id }}
+
+    - name: gds2gltf
+      run: |
+        python -m pip install numpy gdspy triangle pygltflib
+        python3 gds2gltf.py gds/tiny_user_project.gds
+        mv gds/tiny_user_project.gds.gltf tiny_user_project_view.gltf
+    - name: populate view cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          tiny_user_project_view.gltf
+        key: ${{ runner.os }}-view-${{ github.run_id }}  
+
+  pages:
+    if: github.ref_name == 'main'
+    needs:
+    - img
+    - view
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: restore img cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          tiny_user_project_synth.png
+          tiny_user_project_layout.png
+        key: ${{ runner.os }}-img-${{ github.run_id }}
+    - name: restore view cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          tiny_user_project_view.gltf
+        key: ${{ runner.os }}-view-${{ github.run_id }}
+    - name: generate redirect to viewer
+      run: |
+        cat << EOF >> index.html
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Redirecting to GDS Viewer...</title>
+          </head>
+          <body>
+            <script>
+              location.href = "https://gds-viewer.tinytapeout.com/?model=" + encodeURIComponent(location.href + '/tiny_user_project_view.gltf');
+            </script>
+          </body>
+          </html>
+        EOF        
+    - name: setup pages
+      uses: actions/configure-pages@v2
+    - name: upload artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: '.'
+    - name: deploy to github pages
+      id: deployment
+      uses: actions/deploy-pages@v1
+
+  preview:
+    needs: pages
+    runs-on: ubuntu-latest
+    steps:
+    - name: add gds preview
+      run: |
+        PAGE_URL=${{ needs.pages.outputs.page_url }}
+        PAGE_URL=$(echo "$PAGE_URL" | sed -e 's/\/$//')
+        cat << EOF >> $GITHUB_STEP_SUMMARY
+        # synth
+        ![synth]($PAGE_URL/tiny_user_project_synth.png)
+        # layout
+        ![layout]($PAGE_URL/tiny_user_project_layout.png)
+        # viewer
+        [viewer](https://gds-viewer.tinytapeout.com/?model=$PAGE_URL/tiny_user_project_view.gltf)
+        EOF
