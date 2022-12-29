@@ -128,7 +128,8 @@ def get_io_ranges(yaml):
     output_range = (input_range[1], input_range[1]+len(yaml['documentation']['outputs']))
     gpio_end = output_range[1]
     if gpio_end > GPIO_VALID_RANGE[1]:
-        print(gpio_end)
+        print(input_range)
+        print(output_range)
         raise Exception('ETOOMANY IOs')
     return (input_range, output_range)
 
