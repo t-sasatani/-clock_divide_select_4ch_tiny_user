@@ -1,88 +1,56 @@
-/* Automatically generated from https://wokwi.com/projects/334445762078310996 */
 
-`default_nettype none
+module user_module(
+        input   wire    clk,
+        input   wire    [34:0] io_in,
+        output  wire    out
+    );
+    
+    reg [8:0]   clock_counter_a     =   9'b000000000;
+    reg [8:0]   clock_counter_b     =   9'b000000000;
+    reg [8:0]   clock_counter_c     =   9'b000000000;
+    reg [8:0]   clock_counter_d     =   9'b000000000;
+    reg [3:0]   div_clock         =   4'b0000;
 
-module user_module_334445762078310996(
-  input [7:0] io_in,
-  output [7:0] io_out
-);
-  wire net1 = 1'b1;
-  wire net2 = 1'b0;
-  wire net3;
-  wire net4;
-  wire net5;
-  wire net6;
-  wire net7;
-  wire net8 = 1'b1;
-  wire net9 = 1'b0;
-  wire net10;
-  wire net11;
-  wire net12 = 1'b1;
-  wire net13 = 1'b0;
-  wire net14;
-  wire net15 = 1'b1;
-  wire net16 = 1'b0;
-  wire net17;
-  wire net18 = 1'b0;
-  wire net19 = 1'b1;
-  wire net20;
-  wire net21 = 1'b1;
-  wire net22;
-  wire net23;
-  wire net24 = 1'b0;
-  wire net25 = 1'b0;
+    wire [7:0]  clock_div_factor_a;
+    wire [7:0]  clock_div_factor_b;
+    wire [7:0]  clock_div_factor_c;
+    wire [7:0]  clock_div_factor_d;
+    wire [1:0]  clock_select;
+    wire        enable;
+    wire        clock_syn;
+    
+    assign  clock_select = io_in[1:0];
+    assign  enable = io_in[34];
+    assign  clock_syn = (enable)? div_clock[clock_select]:0;
+    assign  clock_div_factor_a = io_in[9:2];
+    assign  clock_div_factor_b = io_in[17:10];
+    assign  clock_div_factor_c = io_in[25:18];
+    assign  clock_div_factor_d = io_in[33:26];
+    
+    
+    always @ (posedge clk) begin
+        clock_counter_a <= clock_counter_a + 1;
+        clock_counter_b <= clock_counter_b + 1;
+        clock_counter_c <= clock_counter_c + 1;
+        clock_counter_d <= clock_counter_d + 1;
 
-  and_cell gate1 (
-    .a (net3)
-  );
-  or_cell gate2 (
-
-  );
-  xor_cell gate3 (
-
-  );
-  nand_cell gate4 (
-    .a (net4),
-    .b (net5),
-    .out (net6)
-  );
-  not_cell gate5 (
-    .in (net7),
-    .out (net5)
-  );
-  buffer_cell gate6 (
-
-  );
-  mux_cell mux1 (
-    .a (net8),
-    .b (net9),
-    .sel (net10),
-    .out (net11)
-  );
-  dff_cell flipflop1 (
-
-  );
-  mux_cell mux2 (
-    .a (net12),
-    .b (net13),
-    .sel (net10),
-    .out (net14)
-  );
-  mux_cell mux3 (
-    .a (net15),
-    .b (net16),
-    .sel (net10),
-    .out (net17)
-  );
-  mux_cell mux4 (
-    .a (net18),
-    .b (net19),
-    .sel (net10),
-    .out (net20)
-  );
-  and_cell gate7 (
-    .a (net22),
-    .b (net23),
-    .out (net4)
-  );
+        if (clock_div_factor_a < clock_counter_a) begin
+            div_clock[0] <= ~div_clock[0];
+            clock_counter_a <= 9'b000000000;
+        end
+        if (clock_div_factor_b < clock_counter_b) begin
+            div_clock[1] <= ~div_clock[1];
+            clock_counter_b <= 9'b000000000;
+        end
+        if (clock_div_factor_c < clock_counter_c) begin
+            div_clock[2] <= ~div_clock[2];
+            clock_counter_c <= 9'b000000000;
+        end
+        if (clock_div_factor_d < clock_counter_d) begin
+            div_clock[3] <= ~div_clock[3];
+            clock_counter_d <= 9'b000000000;
+        end
+    end
+    
+    assign out = clock_syn;
 endmodule
