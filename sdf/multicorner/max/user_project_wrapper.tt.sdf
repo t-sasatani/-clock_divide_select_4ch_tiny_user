@@ -1,7 +1,7 @@
 (DELAYFILE
  (SDFVERSION "3.0")
  (DESIGN "user_project_wrapper")
- (DATE "Thu Dec 29 18:39:51 2022")
+ (DATE "Thu Dec 29 19:03:28 2022")
  (VENDOR "Parallax")
  (PROGRAM "STA")
  (VERSION "2.3.2")
@@ -16,9 +16,9 @@
   (DELAY
    (ABSOLUTE
     (INTERCONNECT io_in[0] mprj.io_in[0] (1.288:1.288:1.288) (0.694:0.694:0.694))
-    (INTERCONNECT io_in[10] mprj.io_in[10] (1.206:1.206:1.206) (0.725:0.725:0.725))
-    (INTERCONNECT io_in[11] mprj.io_in[11] (1.128:1.128:1.128) (0.653:0.653:0.653))
-    (INTERCONNECT io_in[12] mprj.io_in[12] (0.927:0.927:0.927) (0.557:0.557:0.557))
+    (INTERCONNECT io_in[10] mprj.io_in[10] (1.205:1.205:1.205) (0.725:0.725:0.725))
+    (INTERCONNECT io_in[11] mprj.io_in[11] (1.128:1.128:1.128) (0.652:0.652:0.652))
+    (INTERCONNECT io_in[12] mprj.io_in[12] (0.927:0.927:0.927) (0.556:0.556:0.556))
     (INTERCONNECT io_in[13] mprj.io_in[13] (1.799:1.799:1.799) (1.168:1.168:1.168))
     (INTERCONNECT io_in[14] mprj.io_in[14] (1.127:1.127:1.127) (0.700:0.700:0.700))
     (INTERCONNECT io_in[15] mprj.io_in[15] (1.375:1.375:1.375) (0.905:0.905:0.905))
@@ -50,9 +50,9 @@
     (INTERCONNECT io_in[4] mprj.io_in[4] (0.692:0.692:0.692) (0.397:0.397:0.397))
     (INTERCONNECT io_in[5] mprj.io_in[5] (0.702:0.702:0.702) (0.403:0.403:0.403))
     (INTERCONNECT io_in[6] mprj.io_in[6] (0.535:0.535:0.535) (0.301:0.301:0.301))
-    (INTERCONNECT io_in[7] mprj.io_in[7] (0.472:0.472:0.472) (0.265:0.265:0.265))
+    (INTERCONNECT io_in[7] mprj.io_in[7] (0.472:0.472:0.472) (0.264:0.264:0.264))
     (INTERCONNECT io_in[8] mprj.io_in[8] (0.609:0.609:0.609) (0.342:0.342:0.342))
-    (INTERCONNECT io_in[9] mprj.io_in[9] (0.660:0.660:0.660) (0.377:0.377:0.377))
+    (INTERCONNECT io_in[9] mprj.io_in[9] (0.659:0.659:0.659) (0.377:0.377:0.377))
     (INTERCONNECT mprj.io_oeb[0] io_oeb[0] (0.087:0.087:0.087))
     (INTERCONNECT mprj.io_oeb[10] io_oeb[10] (0.488:0.488:0.488))
     (INTERCONNECT mprj.io_oeb[11] io_oeb[11] (0.290:0.290:0.290))
